@@ -10,29 +10,53 @@ use Ttpryg\CatalogEngine\ValueObjects\ProductStatus;
 class Product implements ProductInterface
 {
     private int|string|null $id;
+
     private int|string|null $storeId;
+
     private int|string|null $ownerId;
+
     private string $name;
+
     private string $slug;
+
     private ?string $sku;
+
     private ?string $barcode;
+
     private ?string $summary;
+
     private ?string $description;
+
     private float $price;
+
     private ?float $salePrice;
+
     private ?float $costPrice;
+
     private int $stock;
+
     private int $minStock;
+
     private int $weightGrams;
+
     private ?array $dimensions;
+
     private string $status;
+
     private bool $isFeatured;
+
     private array $attributes;
+
     private array $images;
+
     private int $viewCount;
+
     private int $salesCount;
+
     private ?DateTimeInterface $createdAt;
+
     private ?DateTimeInterface $updatedAt;
+
     private ?DateTimeInterface $deletedAt;
 
     public function __construct(
@@ -84,8 +108,8 @@ class Product implements ProductInterface
         $this->images = $images;
         $this->viewCount = $viewCount;
         $this->salesCount = $salesCount;
-        $this->createdAt = $createdAt ?? new DateTimeImmutable();
-        $this->updatedAt = $updatedAt ?? new DateTimeImmutable();
+        $this->createdAt = $createdAt ?? new DateTimeImmutable;
+        $this->updatedAt = $updatedAt ?? new DateTimeImmutable;
         $this->deletedAt = $deletedAt;
     }
 
@@ -97,6 +121,7 @@ class Product implements ProductInterface
     public function setId(int|string $id): self
     {
         $this->id = $id;
+
         return $this;
     }
 
@@ -108,6 +133,7 @@ class Product implements ProductInterface
     public function setStoreId(int|string|null $storeId): self
     {
         $this->storeId = $storeId;
+
         return $this;
     }
 
@@ -119,6 +145,7 @@ class Product implements ProductInterface
     public function setOwnerId(int|string|null $ownerId): self
     {
         $this->ownerId = $ownerId;
+
         return $this;
     }
 
@@ -130,6 +157,7 @@ class Product implements ProductInterface
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -141,6 +169,7 @@ class Product implements ProductInterface
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+
         return $this;
     }
 
@@ -152,6 +181,7 @@ class Product implements ProductInterface
     public function setSku(?string $sku): self
     {
         $this->sku = $sku;
+
         return $this;
     }
 
@@ -178,6 +208,7 @@ class Product implements ProductInterface
     public function setPrice(float $price): self
     {
         $this->price = $price;
+
         return $this;
     }
 
@@ -189,6 +220,7 @@ class Product implements ProductInterface
     public function setSalePrice(?float $salePrice): self
     {
         $this->salePrice = $salePrice;
+
         return $this;
     }
 
@@ -204,7 +236,7 @@ class Product implements ProductInterface
 
     public function getDiscountPercentage(): float
     {
-        if (!$this->isOnSale() || $this->price <= 0) {
+        if (! $this->isOnSale() || $this->price <= 0) {
             return 0.0;
         }
 
@@ -224,6 +256,7 @@ class Product implements ProductInterface
     public function setStock(int $stock): self
     {
         $this->stock = $stock;
+
         return $this;
     }
 
@@ -252,6 +285,7 @@ class Product implements ProductInterface
         if (ProductStatus::isValid($status)) {
             $this->status = $status;
         }
+
         return $this;
     }
 

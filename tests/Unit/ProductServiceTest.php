@@ -9,7 +9,6 @@ use Ttpryg\CatalogEngine\Contracts\SlugGeneratorInterface;
 use Ttpryg\CatalogEngine\Entities\Product;
 use Ttpryg\CatalogEngine\Events\LowStockDetectedEvent;
 use Ttpryg\CatalogEngine\Events\ProductCreatedEvent;
-use Ttpryg\CatalogEngine\Events\ProductPriceChangedEvent;
 use Ttpryg\CatalogEngine\Events\ProductStockUpdatedEvent;
 use Ttpryg\CatalogEngine\Exceptions\InsufficientStockException;
 use Ttpryg\CatalogEngine\Exceptions\ProductNotFoundException;
@@ -18,7 +17,7 @@ use Ttpryg\CatalogEngine\Services\ProductService;
 class ProductServiceTest extends TestCase
 {
     // POSITIVE CASE: Create Product
-    public function testSuccessfulProductCreation(): void
+    public function test_successful_product_creation(): void
     {
         $repo = $this->createMock(ProductRepositoryInterface::class);
         $slugGen = $this->createMock(SlugGeneratorInterface::class);
@@ -31,6 +30,7 @@ class ProductServiceTest extends TestCase
             ->method('save')
             ->willReturnCallback(function (Product $p) {
                 $p->setId(1);
+
                 return $p;
             });
 
@@ -47,7 +47,7 @@ class ProductServiceTest extends TestCase
     }
 
     // POSITIVE CASE & EVENT: Stock Update & Low Stock Detection
-    public function testStockDeductionTriggersLowStockEvent(): void
+    public function test_stock_deduction_triggers_low_stock_event(): void
     {
         $repo = $this->createMock(ProductRepositoryInterface::class);
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
@@ -75,7 +75,7 @@ class ProductServiceTest extends TestCase
     }
 
     // NEGATIVE CASE: Deduct Stock Exceeds Stock Throws InsufficientStockException
-    public function testInsufficientStockThrowsException(): void
+    public function test_insufficient_stock_throws_exception(): void
     {
         $repo = $this->createMock(ProductRepositoryInterface::class);
 
@@ -89,7 +89,7 @@ class ProductServiceTest extends TestCase
     }
 
     // NEGATIVE CASE: Non Existent Product Throws ProductNotFoundException
-    public function testUpdatePriceFailsOnNonExistentProduct(): void
+    public function test_update_price_fails_on_non_existent_product(): void
     {
         $repo = $this->createMock(ProductRepositoryInterface::class);
         $repo->method('findById')->with(999)->willReturn(null);

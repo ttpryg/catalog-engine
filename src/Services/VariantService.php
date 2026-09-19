@@ -25,7 +25,7 @@ class VariantService
         array $variantAttributes = []
     ): ProductVariant {
         $product = $this->productRepository->findById($productId);
-        if (!$product) {
+        if (! $product) {
             throw ProductNotFoundException::byId($productId);
         }
 
@@ -44,7 +44,7 @@ class VariantService
     public function updateVariantStock(int|string $variantId, int $quantityChange): bool
     {
         $variant = $this->variantRepository->findById($variantId);
-        if (!$variant) {
+        if (! $variant) {
             throw VariantNotFoundException::byId($variantId);
         }
 

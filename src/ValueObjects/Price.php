@@ -13,10 +13,10 @@ class Price
         public readonly string $currency = 'IDR'
     ) {
         if ($amount < 0) {
-            throw new InvalidArgumentException("Product price cannot be negative.");
+            throw new InvalidArgumentException('Product price cannot be negative.');
         }
         if ($saleAmount !== null && $saleAmount < 0) {
-            throw new InvalidArgumentException("Sale price cannot be negative.");
+            throw new InvalidArgumentException('Sale price cannot be negative.');
         }
     }
 
@@ -34,7 +34,7 @@ class Price
 
     public function getDiscountPercentage(): float
     {
-        if (!$this->isOnSale() || $this->amount == 0) {
+        if (! $this->isOnSale() || $this->amount == 0) {
             return 0.0;
         }
 
@@ -43,6 +43,6 @@ class Price
 
     public function format(string $symbol = 'Rp ', int $decimals = 0): string
     {
-        return $symbol . number_format($this->getEffectivePrice(), $decimals, ',', '.');
+        return $symbol.number_format($this->getEffectivePrice(), $decimals, ',', '.');
     }
 }
