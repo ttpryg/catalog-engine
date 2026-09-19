@@ -10,6 +10,7 @@ use Ttpryg\CatalogEngine\Entities\ProductVariant;
 class PdoVariantRepository implements VariantRepositoryInterface
 {
     private PDO $pdo;
+
     private string $table;
 
     public function __construct(PDO $pdo, string $table = 'product_variants')
@@ -25,6 +26,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
         $stmt->execute(['id' => $id]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $data ? $this->mapToEntity($data) : null;
     }
 
@@ -35,6 +37,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
         $stmt->execute(['sku' => $sku]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $data ? $this->mapToEntity($data) : null;
     }
 
@@ -85,6 +88,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute([
             'id' => $variant->getId(),
             'sku' => $variant->getSku(),
@@ -99,6 +103,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
     {
         $sql = "DELETE FROM {$this->table} WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id]);
     }
 
@@ -106,13 +111,14 @@ class PdoVariantRepository implements VariantRepositoryInterface
     {
         $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id, 'change' => $quantityChange]);
     }
 
     private function mapToEntity(array $data): ProductVariant
     {
         $attributes = [];
-        if (!empty($data['variant_attributes'])) {
+        if (! empty($data['variant_attributes'])) {
             $decoded = json_decode($data['variant_attributes'], true);
             if (is_array($decoded)) {
                 $attributes = $decoded;
@@ -127,7 +133,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
             stock: (int) ($data['stock'] ?? 0),
             variantAttributes: $attributes,
             id: $data['id'],
-            createdAt: !empty($data['created_at']) ? new DateTimeImmutable($data['created_at']) : null
+            createdAt: ! empty($data['created_at']) ? new DateTimeImmutable($data['created_at']) : null
         );
     }
 }

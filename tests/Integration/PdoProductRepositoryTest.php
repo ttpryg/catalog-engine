@@ -10,6 +10,7 @@ use Ttpryg\CatalogEngine\Repositories\PdoProductRepository;
 class PdoProductRepositoryTest extends TestCase
 {
     private PDO $pdo;
+
     private PdoProductRepository $repository;
 
     protected function setUp(): void
@@ -52,7 +53,7 @@ class PdoProductRepositoryTest extends TestCase
     }
 
     // POSITIVE CASE: Save and Find by Store ID & Owner ID
-    public function testSaveAndFindByStoreAndOwnerId(): void
+    public function test_save_and_find_by_store_and_owner_id(): void
     {
         $product1 = new Product(
             name: 'Kemeja Store A',
@@ -86,7 +87,7 @@ class PdoProductRepositoryTest extends TestCase
     }
 
     // POSITIVE CASE: Stock & Sales Increment
-    public function testStockAndSalesIncrement(): void
+    public function test_stock_and_sales_increment(): void
     {
         $product = new Product('Celana Chino', 'celana-chino', price: 180000.0, stock: 20);
         $saved = $this->repository->save($product);
@@ -101,7 +102,7 @@ class PdoProductRepositoryTest extends TestCase
     }
 
     // NEGATIVE / SOFT DELETE CASE
-    public function testSoftDeleteProduct(): void
+    public function test_soft_delete_product(): void
     {
         $product = new Product('Produk Hapus', 'produk-hapus', price: 50000.0);
         $saved = $this->repository->save($product);

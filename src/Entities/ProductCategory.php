@@ -8,10 +8,15 @@ use DateTimeInterface;
 class ProductCategory
 {
     private int|string|null $id;
+
     private ?int $parentId;
+
     private string $name;
+
     private string $slug;
+
     private ?string $description;
+
     private ?DateTimeInterface $createdAt;
 
     public function __construct(
@@ -27,7 +32,7 @@ class ProductCategory
         $this->name = $name;
         $this->slug = $slug;
         $this->description = $description;
-        $this->createdAt = $createdAt ?? new DateTimeImmutable();
+        $this->createdAt = $createdAt ?? new DateTimeImmutable;
     }
 
     public function getId(): int|string|null
@@ -38,6 +43,7 @@ class ProductCategory
     public function setId(int|string $id): self
     {
         $this->id = $id;
+
         return $this;
     }
 

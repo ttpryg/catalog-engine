@@ -10,6 +10,7 @@ use Ttpryg\CatalogEngine\Entities\Product;
 class PdoProductRepository implements ProductRepositoryInterface
 {
     private PDO $pdo;
+
     private string $table;
 
     public function __construct(PDO $pdo, string $table = 'products')
@@ -21,54 +22,59 @@ class PdoProductRepository implements ProductRepositoryInterface
     public function findById(int|string $id, bool $includeTrashed = false): ?Product
     {
         $sql = "SELECT * FROM {$this->table} WHERE id = :id";
-        if (!$includeTrashed) {
-            $sql .= " AND deleted_at IS NULL";
+        if (! $includeTrashed) {
+            $sql .= ' AND deleted_at IS NULL';
         }
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['id' => $id]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $data ? $this->mapToEntity($data) : null;
     }
 
     public function findBySlug(string $slug, bool $includeTrashed = false): ?Product
     {
         $sql = "SELECT * FROM {$this->table} WHERE slug = :slug";
-        if (!$includeTrashed) {
-            $sql .= " AND deleted_at IS NULL";
+        if (! $includeTrashed) {
+            $sql .= ' AND deleted_at IS NULL';
         }
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['slug' => $slug]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $data ? $this->mapToEntity($data) : null;
     }
 
     public function findBySku(string $sku, bool $includeTrashed = false): ?Product
     {
         $sql = "SELECT * FROM {$this->table} WHERE sku = :sku";
-        if (!$includeTrashed) {
-            $sql .= " AND deleted_at IS NULL";
+        if (! $includeTrashed) {
+            $sql .= ' AND deleted_at IS NULL';
         }
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute(['sku' => $sku]);
 
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $data ? $this->mapToEntity($data) : null;
     }
 
     public function findByStoreId(int|string $storeId, array $criteria = [], int $limit = 20, int $offset = 0, array $orderBy = ['created_at' => 'DESC']): array
     {
         $criteria['store_id'] = $storeId;
+
         return $this->findAll($criteria, $limit, $offset, $orderBy);
     }
 
     public function findByOwnerId(int|string $ownerId, array $criteria = [], int $limit = 20, int $offset = 0, array $orderBy = ['created_at' => 'DESC']): array
     {
         $criteria['owner_id'] = $ownerId;
+
         return $this->findAll($criteria, $limit, $offset, $orderBy);
     }
 
@@ -78,38 +84,38 @@ class PdoProductRepository implements ProductRepositoryInterface
         $params = [];
 
         if (isset($criteria['store_id'])) {
-            $where[] = "store_id = :store_id";
+            $where[] = 'store_id = :store_id';
             $params['store_id'] = $criteria['store_id'];
         }
 
         if (isset($criteria['owner_id'])) {
-            $where[] = "owner_id = :owner_id";
+            $where[] = 'owner_id = :owner_id';
             $params['owner_id'] = $criteria['owner_id'];
         }
 
         if (isset($criteria['status'])) {
-            $where[] = "status = :status";
+            $where[] = 'status = :status';
             $params['status'] = $criteria['status'];
         }
 
         if (isset($criteria['is_featured'])) {
-            $where[] = "is_featured = :is_featured";
+            $where[] = 'is_featured = :is_featured';
             $params['is_featured'] = $criteria['is_featured'] ? 1 : 0;
         }
 
         if (isset($criteria['min_price'])) {
-            $where[] = "price >= :min_price";
+            $where[] = 'price >= :min_price';
             $params['min_price'] = $criteria['min_price'];
         }
 
         if (isset($criteria['max_price'])) {
-            $where[] = "price <= :max_price";
+            $where[] = 'price <= :max_price';
             $params['max_price'] = $criteria['max_price'];
         }
 
         if (isset($criteria['search'])) {
-            $where[] = "(name LIKE :search OR summary LIKE :search OR description LIKE :search OR sku LIKE :search)";
-            $params['search'] = '%' . $criteria['search'] . '%';
+            $where[] = '(name LIKE :search OR summary LIKE :search OR description LIKE :search OR sku LIKE :search)';
+            $params['search'] = '%'.$criteria['search'].'%';
         }
 
         $whereSql = implode(' AND ', $where);
@@ -145,17 +151,17 @@ class PdoProductRepository implements ProductRepositoryInterface
         $params = [];
 
         if (isset($criteria['store_id'])) {
-            $where[] = "store_id = :store_id";
+            $where[] = 'store_id = :store_id';
             $params['store_id'] = $criteria['store_id'];
         }
 
         if (isset($criteria['owner_id'])) {
-            $where[] = "owner_id = :owner_id";
+            $where[] = 'owner_id = :owner_id';
             $params['owner_id'] = $criteria['owner_id'];
         }
 
         if (isset($criteria['status'])) {
-            $where[] = "status = :status";
+            $where[] = 'status = :status';
             $params['status'] = $criteria['status'];
         }
 
@@ -235,6 +241,7 @@ class PdoProductRepository implements ProductRepositoryInterface
                 WHERE id = :id";
 
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute([
             'id' => $product->getId(),
             'store_id' => $product->getStoreId(),
@@ -258,7 +265,7 @@ class PdoProductRepository implements ProductRepositoryInterface
             'images' => json_encode($product->getImages()),
             'view_count' => $product->getViewCount(),
             'sales_count' => $product->getSalesCount(),
-            'updated_at' => (new DateTimeImmutable())->format('Y-m-d H:i:s'),
+            'updated_at' => (new DateTimeImmutable)->format('Y-m-d H:i:s'),
         ]);
     }
 
@@ -267,14 +274,16 @@ class PdoProductRepository implements ProductRepositoryInterface
         if ($softDelete) {
             $sql = "UPDATE {$this->table} SET deleted_at = :deleted_at WHERE id = :id";
             $stmt = $this->pdo->prepare($sql);
+
             return $stmt->execute([
                 'id' => $id,
-                'deleted_at' => (new DateTimeImmutable())->format('Y-m-d H:i:s'),
+                'deleted_at' => (new DateTimeImmutable)->format('Y-m-d H:i:s'),
             ]);
         }
 
         $sql = "DELETE FROM {$this->table} WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id]);
     }
 
@@ -282,6 +291,7 @@ class PdoProductRepository implements ProductRepositoryInterface
     {
         $sql = "UPDATE {$this->table} SET deleted_at = NULL WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id]);
     }
 
@@ -289,6 +299,7 @@ class PdoProductRepository implements ProductRepositoryInterface
     {
         $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id, 'change' => $quantityChange]);
     }
 
@@ -296,6 +307,7 @@ class PdoProductRepository implements ProductRepositoryInterface
     {
         $sql = "UPDATE {$this->table} SET view_count = view_count + 1 WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id]);
     }
 
@@ -303,13 +315,14 @@ class PdoProductRepository implements ProductRepositoryInterface
     {
         $sql = "UPDATE {$this->table} SET sales_count = sales_count + :qty WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
+
         return $stmt->execute(['id' => $id, 'qty' => $quantity]);
     }
 
     private function mapToEntity(array $data): Product
     {
         $dimensions = null;
-        if (!empty($data['dimensions'])) {
+        if (! empty($data['dimensions'])) {
             $decoded = json_decode($data['dimensions'], true);
             if (is_array($decoded)) {
                 $dimensions = $decoded;
@@ -317,7 +330,7 @@ class PdoProductRepository implements ProductRepositoryInterface
         }
 
         $attributes = [];
-        if (!empty($data['attributes'])) {
+        if (! empty($data['attributes'])) {
             $decoded = json_decode($data['attributes'], true);
             if (is_array($decoded)) {
                 $attributes = $decoded;
@@ -325,7 +338,7 @@ class PdoProductRepository implements ProductRepositoryInterface
         }
 
         $images = [];
-        if (!empty($data['images'])) {
+        if (! empty($data['images'])) {
             $decoded = json_decode($data['images'], true);
             if (is_array($decoded)) {
                 $images = $decoded;
@@ -355,9 +368,9 @@ class PdoProductRepository implements ProductRepositoryInterface
             viewCount: (int) ($data['view_count'] ?? 0),
             salesCount: (int) ($data['sales_count'] ?? 0),
             id: $data['id'],
-            createdAt: !empty($data['created_at']) ? new DateTimeImmutable($data['created_at']) : null,
-            updatedAt: !empty($data['updated_at']) ? new DateTimeImmutable($data['updated_at']) : null,
-            deletedAt: !empty($data['deleted_at']) ? new DateTimeImmutable($data['deleted_at']) : null
+            createdAt: ! empty($data['created_at']) ? new DateTimeImmutable($data['created_at']) : null,
+            updatedAt: ! empty($data['updated_at']) ? new DateTimeImmutable($data['updated_at']) : null,
+            deletedAt: ! empty($data['deleted_at']) ? new DateTimeImmutable($data['deleted_at']) : null
         );
     }
 }

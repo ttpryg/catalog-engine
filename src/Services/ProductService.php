@@ -13,7 +13,6 @@ use Ttpryg\CatalogEngine\Events\ProductStockUpdatedEvent;
 use Ttpryg\CatalogEngine\Exceptions\InsufficientStockException;
 use Ttpryg\CatalogEngine\Exceptions\ProductNotFoundException;
 use Ttpryg\CatalogEngine\Utilities\NativeSlugGenerator;
-use Ttpryg\CatalogEngine\ValueObjects\ProductStatus;
 
 class ProductService
 {
@@ -22,7 +21,7 @@ class ProductService
         private ?SlugGeneratorInterface $slugGenerator = null,
         private ?EventDispatcherInterface $eventDispatcher = null
     ) {
-        $this->slugGenerator = $slugGenerator ?? new NativeSlugGenerator();
+        $this->slugGenerator = $slugGenerator ?? new NativeSlugGenerator;
     }
 
     public function createProduct(
@@ -76,7 +75,7 @@ class ProductService
     public function updatePrice(int|string $productId, float $newPrice, ?float $newSalePrice = null): bool
     {
         $product = $this->productRepository->findById($productId);
-        if (!$product) {
+        if (! $product) {
             throw ProductNotFoundException::byId($productId);
         }
 
@@ -98,7 +97,7 @@ class ProductService
     public function updateStock(int|string $productId, int $quantityChange): bool
     {
         $product = $this->productRepository->findById($productId);
-        if (!$product) {
+        if (! $product) {
             throw ProductNotFoundException::byId($productId);
         }
 
@@ -126,22 +125,24 @@ class ProductService
     public function setStatus(int|string $productId, string $status): bool
     {
         $product = $this->productRepository->findById($productId);
-        if (!$product) {
+        if (! $product) {
             throw ProductNotFoundException::byId($productId);
         }
 
         $product->setStatus($status);
+
         return $this->productRepository->update($product);
     }
 
     public function getProductBySlug(string $slug): Product
     {
         $product = $this->productRepository->findBySlug($slug);
-        if (!$product) {
+        if (! $product) {
             throw ProductNotFoundException::bySlug($slug);
         }
 
         $this->productRepository->incrementViews($product->getId());
+
         return $product;
     }
 
