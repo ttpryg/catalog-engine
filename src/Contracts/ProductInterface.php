@@ -7,6 +7,8 @@ use DateTimeInterface;
 interface ProductInterface
 {
     public function getId(): int|string|null;
+    public function getStoreId(): int|string|null;
+    public function getOwnerId(): int|string|null;
     public function getName(): string;
     public function getSlug(): string;
     public function getSku(): ?string;

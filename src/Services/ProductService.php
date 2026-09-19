@@ -28,6 +28,8 @@ class ProductService
     public function createProduct(
         string $name,
         float $price,
+        int|string|null $storeId = null,
+        int|string|null $ownerId = null,
         ?string $slug = null,
         ?string $sku = null,
         ?string $summary = null,
@@ -48,6 +50,8 @@ class ProductService
             name: $name,
             slug: $generatedSlug,
             price: $price,
+            storeId: $storeId,
+            ownerId: $ownerId,
             sku: $sku,
             summary: $summary,
             description: $description,
@@ -139,6 +143,16 @@ class ProductService
 
         $this->productRepository->incrementViews($product->getId());
         return $product;
+    }
+
+    public function getProductsByStore(int|string $storeId, array $criteria = [], int $limit = 20, int $offset = 0): array
+    {
+        return $this->productRepository->findByStoreId($storeId, $criteria, $limit, $offset);
+    }
+
+    public function getProductsByOwner(int|string $ownerId, array $criteria = [], int $limit = 20, int $offset = 0): array
+    {
+        return $this->productRepository->findByOwnerId($ownerId, $criteria, $limit, $offset);
     }
 
     private function generateUniqueSlug(string $name): string

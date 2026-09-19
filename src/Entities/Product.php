@@ -10,6 +10,8 @@ use Ttpryg\CatalogEngine\ValueObjects\ProductStatus;
 class Product implements ProductInterface
 {
     private int|string|null $id;
+    private int|string|null $storeId;
+    private int|string|null $ownerId;
     private string $name;
     private string $slug;
     private ?string $sku;
@@ -37,6 +39,8 @@ class Product implements ProductInterface
         string $name,
         string $slug,
         float $price,
+        int|string|null $storeId = null,
+        int|string|null $ownerId = null,
         ?string $sku = null,
         ?string $barcode = null,
         ?string $summary = null,
@@ -59,6 +63,8 @@ class Product implements ProductInterface
         ?DateTimeInterface $deletedAt = null
     ) {
         $this->id = $id;
+        $this->storeId = $storeId;
+        $this->ownerId = $ownerId;
         $this->name = $name;
         $this->slug = $slug;
         $this->price = $price;
@@ -91,6 +97,28 @@ class Product implements ProductInterface
     public function setId(int|string $id): self
     {
         $this->id = $id;
+        return $this;
+    }
+
+    public function getStoreId(): int|string|null
+    {
+        return $this->storeId;
+    }
+
+    public function setStoreId(int|string|null $storeId): self
+    {
+        $this->storeId = $storeId;
+        return $this;
+    }
+
+    public function getOwnerId(): int|string|null
+    {
+        return $this->ownerId;
+    }
+
+    public function setOwnerId(int|string|null $ownerId): self
+    {
+        $this->ownerId = $ownerId;
         return $this;
     }
 
@@ -162,6 +190,25 @@ class Product implements ProductInterface
     {
         $this->salePrice = $salePrice;
         return $this;
+    }
+
+    public function isOnSale(): bool
+    {
+        return $this->salePrice !== null && $this->salePrice > 0 && $this->salePrice < $this->price;
+    }
+
+    public function getEffectivePrice(): float
+    {
+        return $this->isOnSale() ? $this->salePrice : $this->price;
+    }
+
+    public function getDiscountPercentage(): float
+    {
+        if (!$this->isOnSale() || $this->price <= 0) {
+            return 0.0;
+        }
+
+        return round((($this->price - $this->salePrice) / $this->price) * 100, 1);
     }
 
     public function getCostPrice(): ?float
@@ -252,6 +299,8 @@ class Product implements ProductInterface
     {
         return [
             'id' => $this->id,
+            'store_id' => $this->storeId,
+            'owner_id' => $this->ownerId,
             'name' => $this->name,
             'slug' => $this->slug,
             'sku' => $this->sku,
@@ -260,6 +309,9 @@ class Product implements ProductInterface
             'description' => $this->description,
             'price' => $this->price,
             'sale_price' => $this->salePrice,
+            'effective_price' => $this->getEffectivePrice(),
+            'is_on_sale' => $this->isOnSale(),
+            'discount_percentage' => $this->getDiscountPercentage(),
             'cost_price' => $this->costPrice,
             'stock' => $this->stock,
             'min_stock' => $this->minStock,

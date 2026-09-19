@@ -1,8 +1,10 @@
 -- CatalogEngine Database Schema
--- Standard MySQL / MariaDB DDL
+-- Standard MySQL / MariaDB DDL with Multi-Store & Multi-Owner support
 
 CREATE TABLE IF NOT EXISTS products (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT UNSIGNED NULL COMMENT 'ID Toko tempat produk dijual',
+    owner_id BIGINT UNSIGNED NULL COMMENT 'ID User pemilik dari auth-user',
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     sku VARCHAR(100) NULL UNIQUE COMMENT 'Stock Keeping Unit',
@@ -25,6 +27,8 @@ CREATE TABLE IF NOT EXISTS products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_store_products (store_id, status),
+    INDEX idx_owner_products (owner_id, status),
     INDEX idx_status_price (status, price),
     INDEX idx_slug (slug),
     INDEX idx_sku (sku)
