@@ -192,6 +192,25 @@ class Product implements ProductInterface
         return $this;
     }
 
+    public function isOnSale(): bool
+    {
+        return $this->salePrice !== null && $this->salePrice > 0 && $this->salePrice < $this->price;
+    }
+
+    public function getEffectivePrice(): float
+    {
+        return $this->isOnSale() ? $this->salePrice : $this->price;
+    }
+
+    public function getDiscountPercentage(): float
+    {
+        if (!$this->isOnSale() || $this->price <= 0) {
+            return 0.0;
+        }
+
+        return round((($this->price - $this->salePrice) / $this->price) * 100, 1);
+    }
+
     public function getCostPrice(): ?float
     {
         return $this->costPrice;
@@ -290,6 +309,9 @@ class Product implements ProductInterface
             'description' => $this->description,
             'price' => $this->price,
             'sale_price' => $this->salePrice,
+            'effective_price' => $this->getEffectivePrice(),
+            'is_on_sale' => $this->isOnSale(),
+            'discount_percentage' => $this->getDiscountPercentage(),
             'cost_price' => $this->costPrice,
             'stock' => $this->stock,
             'min_stock' => $this->minStock,

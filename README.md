@@ -6,11 +6,13 @@
 
 - **Framework Agnostic**: Compatible with any PHP 8.1+ project (Vanilla PHP, Slim, Laravel, Symfony, CodeIgniter).
 - **Comprehensive E-Commerce Product Schema**:
-  - `products` table with SKU, barcode, price, sale price, COGS cost price, stock, min stock threshold, weight (grams), dimensions (cm), and attributes JSON.
+  - Multi-tenant support with `store_id` and `owner_id` scoping (`findByStoreId`, `findByOwnerId`).
+  - `products` table with SKU, barcode, price, sale price (harga coret), COGS cost price, stock, min stock threshold, weight (grams), dimensions (cm), and attributes JSON.
   - `product_variants` table for variant attributes (Color, Size, SKU override, Price override).
   - `product_categories` & `product_category_pivot` tables for parent-child category hierarchy.
-- **Value Objects**:
+- **Value Objects & Sale Price Helpers**:
   - `Price`: Calculate effective price, sale discounts (`getDiscountPercentage()`), and currency formatting.
+  - `Product` Entity Helpers: `$product->isOnSale()`, `$product->getEffectivePrice()`, `$product->getDiscountPercentage()`.
   - `Dimensions`: Length, width, height (cm) and volume calculations.
   - `ProductStatus`: Enum (`draft`, `active`, `inactive`, `archived`).
 - **Inventory & Low Stock Alerts**: Automatic triggering of `LowStockDetectedEvent` when stock drops to or below `min_stock`.
@@ -25,6 +27,8 @@ Run the SQL script from `database/schema.sql` or use `DatabaseMigrator`:
 ```sql
 CREATE TABLE IF NOT EXISTS products (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT UNSIGNED NULL COMMENT 'ID Toko',
+    owner_id BIGINT UNSIGNED NULL COMMENT 'ID Owner (AuthUser)',
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
     sku VARCHAR(100) NULL UNIQUE,
@@ -32,7 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
     summary VARCHAR(500) NULL,
     description LONGTEXT NULL,
     price DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
-    sale_price DECIMAL(15, 2) NULL,
+    sale_price DECIMAL(15, 2) NULL COMMENT 'Harga Diskon / Harga Coret',
     cost_price DECIMAL(15, 2) NULL,
     stock INT NOT NULL DEFAULT 0,
     min_stock INT NOT NULL DEFAULT 5,
@@ -47,6 +51,8 @@ CREATE TABLE IF NOT EXISTS products (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP NULL DEFAULT NULL,
+    INDEX idx_store_products (store_id, status),
+    INDEX idx_owner_products (owner_id, status),
     INDEX idx_status_price (status, price),
     INDEX idx_slug (slug),
     INDEX idx_sku (sku)
