@@ -60,10 +60,32 @@ class PdoProductRepository implements ProductRepositoryInterface
         return $data ? $this->mapToEntity($data) : null;
     }
 
+    public function findByStoreId(int|string $storeId, array $criteria = [], int $limit = 20, int $offset = 0, array $orderBy = ['created_at' => 'DESC']): array
+    {
+        $criteria['store_id'] = $storeId;
+        return $this->findAll($criteria, $limit, $offset, $orderBy);
+    }
+
+    public function findByOwnerId(int|string $ownerId, array $criteria = [], int $limit = 20, int $offset = 0, array $orderBy = ['created_at' => 'DESC']): array
+    {
+        $criteria['owner_id'] = $ownerId;
+        return $this->findAll($criteria, $limit, $offset, $orderBy);
+    }
+
     public function findAll(array $criteria = [], int $limit = 20, int $offset = 0, array $orderBy = ['created_at' => 'DESC']): array
     {
         $where = ['deleted_at IS NULL'];
         $params = [];
+
+        if (isset($criteria['store_id'])) {
+            $where[] = "store_id = :store_id";
+            $params['store_id'] = $criteria['store_id'];
+        }
+
+        if (isset($criteria['owner_id'])) {
+            $where[] = "owner_id = :owner_id";
+            $params['owner_id'] = $criteria['owner_id'];
+        }
 
         if (isset($criteria['status'])) {
             $where[] = "status = :status";
@@ -122,6 +144,16 @@ class PdoProductRepository implements ProductRepositoryInterface
         $where = ['deleted_at IS NULL'];
         $params = [];
 
+        if (isset($criteria['store_id'])) {
+            $where[] = "store_id = :store_id";
+            $params['store_id'] = $criteria['store_id'];
+        }
+
+        if (isset($criteria['owner_id'])) {
+            $where[] = "owner_id = :owner_id";
+            $params['owner_id'] = $criteria['owner_id'];
+        }
+
         if (isset($criteria['status'])) {
             $where[] = "status = :status";
             $params['status'] = $criteria['status'];
@@ -139,11 +171,13 @@ class PdoProductRepository implements ProductRepositoryInterface
     public function save(Product $product): Product
     {
         $sql = "INSERT INTO {$this->table} 
-                (name, slug, sku, barcode, summary, description, price, sale_price, cost_price, stock, min_stock, weight_grams, dimensions, status, is_featured, attributes, images, view_count, sales_count, created_at, updated_at) 
-                VALUES (:name, :slug, :sku, :barcode, :summary, :description, :price, :sale_price, :cost_price, :stock, :min_stock, :weight_grams, :dimensions, :status, :is_featured, :attributes, :images, :view_count, :sales_count, :created_at, :updated_at)";
+                (store_id, owner_id, name, slug, sku, barcode, summary, description, price, sale_price, cost_price, stock, min_stock, weight_grams, dimensions, status, is_featured, attributes, images, view_count, sales_count, created_at, updated_at) 
+                VALUES (:store_id, :owner_id, :name, :slug, :sku, :barcode, :summary, :description, :price, :sale_price, :cost_price, :stock, :min_stock, :weight_grams, :dimensions, :status, :is_featured, :attributes, :images, :view_count, :sales_count, :created_at, :updated_at)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
+            'store_id' => $product->getStoreId(),
+            'owner_id' => $product->getOwnerId(),
             'name' => $product->getName(),
             'slug' => $product->getSlug(),
             'sku' => $product->getSku(),
@@ -176,7 +210,9 @@ class PdoProductRepository implements ProductRepositoryInterface
     public function update(Product $product): bool
     {
         $sql = "UPDATE {$this->table} 
-                SET name = :name, 
+                SET store_id = :store_id, 
+                    owner_id = :owner_id, 
+                    name = :name, 
                     slug = :slug, 
                     sku = :sku, 
                     barcode = :barcode, 
@@ -201,6 +237,8 @@ class PdoProductRepository implements ProductRepositoryInterface
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             'id' => $product->getId(),
+            'store_id' => $product->getStoreId(),
+            'owner_id' => $product->getOwnerId(),
             'name' => $product->getName(),
             'slug' => $product->getSlug(),
             'sku' => $product->getSku(),
@@ -298,6 +336,8 @@ class PdoProductRepository implements ProductRepositoryInterface
             name: $data['name'],
             slug: $data['slug'],
             price: (float) $data['price'],
+            storeId: isset($data['store_id']) ? $data['store_id'] : null,
+            ownerId: isset($data['owner_id']) ? $data['owner_id'] : null,
             sku: $data['sku'] ?? null,
             barcode: $data['barcode'] ?? null,
             summary: $data['summary'] ?? null,
