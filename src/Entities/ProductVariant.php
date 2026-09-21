@@ -7,39 +7,18 @@ use DateTimeInterface;
 
 class ProductVariant
 {
-    private int|string|null $id;
-
-    private int|string $productId;
-
-    private string $name;
-
-    private ?string $sku;
-
-    private ?float $price;
-
-    private int $stock;
-
-    private array $variantAttributes;
-
-    private ?DateTimeInterface $createdAt;
+    private readonly ?DateTimeInterface $createdAt;
 
     public function __construct(
-        int|string $productId,
-        string $name,
-        ?string $sku = null,
-        ?float $price = null,
-        int $stock = 0,
-        array $variantAttributes = [],
-        int|string|null $id = null,
+        private readonly int|string $productId,
+        private readonly string $name,
+        private readonly ?string $sku = null,
+        private readonly ?float $price = null,
+        private int $stock = 0,
+        private readonly array $variantAttributes = [],
+        private int|string|null $id = null,
         ?DateTimeInterface $createdAt = null
     ) {
-        $this->id = $id;
-        $this->productId = $productId;
-        $this->name = $name;
-        $this->sku = $sku;
-        $this->price = $price;
-        $this->stock = $stock;
-        $this->variantAttributes = $variantAttributes;
         $this->createdAt = $createdAt ?? new DateTimeImmutable;
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\CatalogEngine\Contracts;
 
 use Ttpryg\CatalogEngine\Entities\ProductVariant;
@@ -12,9 +14,9 @@ interface VariantRepositoryInterface
 
     public function findByProductId(int|string $productId): array;
 
-    public function save(ProductVariant $variant): ProductVariant;
+    public function save(ProductVariant $productVariant): ProductVariant;
 
-    public function update(ProductVariant $variant): bool;
+    public function update(ProductVariant $productVariant): bool;
 
     public function delete(int|string $id): bool;
 

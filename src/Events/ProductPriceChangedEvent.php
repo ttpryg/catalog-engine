@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\CatalogEngine\Events;
 
 use Ttpryg\CatalogEngine\Entities\Product;
