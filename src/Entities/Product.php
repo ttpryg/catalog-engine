@@ -9,108 +9,42 @@ use Ttpryg\CatalogEngine\ValueObjects\ProductStatus;
 
 class Product implements ProductInterface
 {
-    private int|string|null $id;
-
-    private int|string|null $storeId;
-
-    private int|string|null $ownerId;
-
-    private string $name;
-
-    private string $slug;
-
-    private ?string $sku;
-
-    private ?string $barcode;
-
-    private ?string $summary;
-
-    private ?string $description;
-
-    private float $price;
-
-    private ?float $salePrice;
-
-    private ?float $costPrice;
-
-    private int $stock;
-
-    private int $minStock;
-
-    private int $weightGrams;
-
-    private ?array $dimensions;
-
     private string $status;
 
-    private bool $isFeatured;
+    private readonly ?DateTimeInterface $createdAt;
 
-    private array $attributes;
-
-    private array $images;
-
-    private int $viewCount;
-
-    private int $salesCount;
-
-    private ?DateTimeInterface $createdAt;
-
-    private ?DateTimeInterface $updatedAt;
-
-    private ?DateTimeInterface $deletedAt;
+    private readonly ?DateTimeInterface $updatedAt;
 
     public function __construct(
-        string $name,
-        string $slug,
-        float $price,
-        int|string|null $storeId = null,
-        int|string|null $ownerId = null,
-        ?string $sku = null,
-        ?string $barcode = null,
-        ?string $summary = null,
-        ?string $description = null,
-        ?float $salePrice = null,
-        ?float $costPrice = null,
-        int $stock = 0,
-        int $minStock = 5,
-        int $weightGrams = 0,
-        ?array $dimensions = null,
+        private string $name,
+        private string $slug,
+        private float $price,
+        private int|string|null $storeId = null,
+        private int|string|null $ownerId = null,
+        private ?string $sku = null,
+        private readonly ?string $barcode = null,
+        private readonly ?string $summary = null,
+        private readonly ?string $description = null,
+        private ?float $salePrice = null,
+        private readonly ?float $costPrice = null,
+        private int $stock = 0,
+        private readonly int $minStock = 5,
+        private readonly int $weightGrams = 0,
+        private readonly ?array $dimensions = null,
         string $status = 'draft',
-        bool $isFeatured = false,
-        array $attributes = [],
-        array $images = [],
-        int $viewCount = 0,
-        int $salesCount = 0,
-        int|string|null $id = null,
+        private readonly bool $isFeatured = false,
+        private readonly array $attributes = [],
+        private readonly array $images = [],
+        private readonly int $viewCount = 0,
+        private readonly int $salesCount = 0,
+        private int|string|null $id = null,
         ?DateTimeInterface $createdAt = null,
         ?DateTimeInterface $updatedAt = null,
-        ?DateTimeInterface $deletedAt = null
+        private readonly ?DateTimeInterface $deletedAt = null
     ) {
-        $this->id = $id;
-        $this->storeId = $storeId;
-        $this->ownerId = $ownerId;
-        $this->name = $name;
-        $this->slug = $slug;
-        $this->price = $price;
-        $this->sku = $sku;
-        $this->barcode = $barcode;
-        $this->summary = $summary;
-        $this->description = $description;
-        $this->salePrice = $salePrice;
-        $this->costPrice = $costPrice;
-        $this->stock = $stock;
-        $this->minStock = $minStock;
-        $this->weightGrams = $weightGrams;
-        $this->dimensions = $dimensions;
         $this->status = ProductStatus::isValid($status) ? $status : ProductStatus::DRAFT->value;
-        $this->isFeatured = $isFeatured;
-        $this->attributes = $attributes;
-        $this->images = $images;
-        $this->viewCount = $viewCount;
-        $this->salesCount = $salesCount;
         $this->createdAt = $createdAt ?? new DateTimeImmutable;
         $this->updatedAt = $updatedAt ?? new DateTimeImmutable;
-        $this->deletedAt = $deletedAt;
     }
 
     public function getId(): int|string|null

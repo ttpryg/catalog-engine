@@ -7,31 +7,16 @@ use DateTimeInterface;
 
 class ProductCategory
 {
-    private int|string|null $id;
-
-    private ?int $parentId;
-
-    private string $name;
-
-    private string $slug;
-
-    private ?string $description;
-
-    private ?DateTimeInterface $createdAt;
+    private readonly ?DateTimeInterface $createdAt;
 
     public function __construct(
-        string $name,
-        string $slug,
-        ?int $parentId = null,
-        ?string $description = null,
-        int|string|null $id = null,
+        private readonly string $name,
+        private readonly string $slug,
+        private readonly ?int $parentId = null,
+        private readonly ?string $description = null,
+        private int|string|null $id = null,
         ?DateTimeInterface $createdAt = null
     ) {
-        $this->id = $id;
-        $this->parentId = $parentId;
-        $this->name = $name;
-        $this->slug = $slug;
-        $this->description = $description;
         $this->createdAt = $createdAt ?? new DateTimeImmutable;
     }
 

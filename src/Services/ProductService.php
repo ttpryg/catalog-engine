@@ -17,9 +17,9 @@ use Ttpryg\CatalogEngine\Utilities\NativeSlugGenerator;
 class ProductService
 {
     public function __construct(
-        private ProductRepositoryInterface $productRepository,
+        private readonly ProductRepositoryInterface $productRepository,
         private ?SlugGeneratorInterface $slugGenerator = null,
-        private ?EventDispatcherInterface $eventDispatcher = null
+        private readonly ?EventDispatcherInterface $eventDispatcher = null
     ) {
         $this->slugGenerator = $slugGenerator ?? new NativeSlugGenerator;
     }
@@ -75,7 +75,7 @@ class ProductService
     public function updatePrice(int|string $productId, float $newPrice, ?float $newSalePrice = null): bool
     {
         $product = $this->productRepository->findById($productId);
-        if (! $product) {
+        if (! $product instanceof \Ttpryg\CatalogEngine\Entities\Product) {
             throw ProductNotFoundException::byId($productId);
         }
 
@@ -97,7 +97,7 @@ class ProductService
     public function updateStock(int|string $productId, int $quantityChange): bool
     {
         $product = $this->productRepository->findById($productId);
-        if (! $product) {
+        if (! $product instanceof \Ttpryg\CatalogEngine\Entities\Product) {
             throw ProductNotFoundException::byId($productId);
         }
 
@@ -125,7 +125,7 @@ class ProductService
     public function setStatus(int|string $productId, string $status): bool
     {
         $product = $this->productRepository->findById($productId);
-        if (! $product) {
+        if (! $product instanceof \Ttpryg\CatalogEngine\Entities\Product) {
             throw ProductNotFoundException::byId($productId);
         }
 
@@ -137,7 +137,7 @@ class ProductService
     public function getProductBySlug(string $slug): Product
     {
         $product = $this->productRepository->findBySlug($slug);
-        if (! $product) {
+        if (! $product instanceof \Ttpryg\CatalogEngine\Entities\Product) {
             throw ProductNotFoundException::bySlug($slug);
         }
 
@@ -162,7 +162,7 @@ class ProductService
         $slug = $baseSlug;
         $counter = 1;
 
-        while ($this->productRepository->findBySlug($slug) !== null) {
+        while ($this->productRepository->findBySlug($slug) instanceof \Ttpryg\CatalogEngine\Entities\Product) {
             $slug = "{$baseSlug}-{$counter}";
             $counter++;
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\CatalogEngine\Contracts;
 
 use Ttpryg\CatalogEngine\Entities\ProductCategory;
@@ -12,9 +14,9 @@ interface CategoryRepositoryInterface
 
     public function findAll(?int $parentId = null): array;
 
-    public function save(ProductCategory $category): ProductCategory;
+    public function save(ProductCategory $productCategory): ProductCategory;
 
-    public function update(ProductCategory $category): bool;
+    public function update(ProductCategory $productCategory): bool;
 
     public function delete(int|string $id): bool;
 

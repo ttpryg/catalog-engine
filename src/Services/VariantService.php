@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\CatalogEngine\Services;
 
 use Ttpryg\CatalogEngine\Contracts\ProductRepositoryInterface;
@@ -12,8 +14,8 @@ use Ttpryg\CatalogEngine\Exceptions\VariantNotFoundException;
 class VariantService
 {
     public function __construct(
-        private VariantRepositoryInterface $variantRepository,
-        private ProductRepositoryInterface $productRepository
+        private readonly VariantRepositoryInterface $variantRepository,
+        private readonly ProductRepositoryInterface $productRepository
     ) {}
 
     public function addVariant(
@@ -25,11 +27,11 @@ class VariantService
         array $variantAttributes = []
     ): ProductVariant {
         $product = $this->productRepository->findById($productId);
-        if (! $product) {
+        if (! $product instanceof \Ttpryg\CatalogEngine\Entities\Product) {
             throw ProductNotFoundException::byId($productId);
         }
 
-        $variant = new ProductVariant(
+        $productVariant = new ProductVariant(
             productId: $productId,
             name: $name,
             sku: $sku,
@@ -38,13 +40,13 @@ class VariantService
             variantAttributes: $variantAttributes
         );
 
-        return $this->variantRepository->save($variant);
+        return $this->variantRepository->save($productVariant);
     }
 
     public function updateVariantStock(int|string $variantId, int $quantityChange): bool
     {
         $variant = $this->variantRepository->findById($variantId);
-        if (! $variant) {
+        if (! $variant instanceof \Ttpryg\CatalogEngine\Entities\ProductVariant) {
             throw VariantNotFoundException::byId($variantId);
         }
 

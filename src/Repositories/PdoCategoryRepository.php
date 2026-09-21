@@ -9,18 +9,7 @@ use Ttpryg\CatalogEngine\Entities\ProductCategory;
 
 class PdoCategoryRepository implements CategoryRepositoryInterface
 {
-    private PDO $pdo;
-
-    private string $table;
-
-    private string $pivotTable;
-
-    public function __construct(PDO $pdo, string $table = 'product_categories', string $pivotTable = 'product_category_pivot')
-    {
-        $this->pdo = $pdo;
-        $this->table = $table;
-        $this->pivotTable = $pivotTable;
-    }
+    public function __construct(private readonly PDO $pdo, private readonly string $table = 'product_categories', private readonly string $pivotTable = 'product_category_pivot') {}
 
     public function findById(int|string $id): ?ProductCategory
     {
@@ -64,37 +53,37 @@ class PdoCategoryRepository implements CategoryRepositoryInterface
         return $results;
     }
 
-    public function save(ProductCategory $category): ProductCategory
+    public function save(ProductCategory $productCategory): ProductCategory
     {
         $sql = "INSERT INTO {$this->table} (parent_id, name, slug, description, created_at) 
                 VALUES (:parent_id, :name, :slug, :description, :created_at)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            'parent_id' => $category->getParentId(),
-            'name' => $category->getName(),
-            'slug' => $category->getSlug(),
-            'description' => $category->getDescription(),
-            'created_at' => $category->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'parent_id' => $productCategory->getParentId(),
+            'name' => $productCategory->getName(),
+            'slug' => $productCategory->getSlug(),
+            'description' => $productCategory->getDescription(),
+            'created_at' => $productCategory->getCreatedAt()?->format('Y-m-d H:i:s'),
         ]);
 
         $id = $this->pdo->lastInsertId();
-        $category->setId($id);
+        $productCategory->setId($id);
 
-        return $category;
+        return $productCategory;
     }
 
-    public function update(ProductCategory $category): bool
+    public function update(ProductCategory $productCategory): bool
     {
         $sql = "UPDATE {$this->table} SET parent_id = :parent_id, name = :name, slug = :slug, description = :description WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([
-            'id' => $category->getId(),
-            'parent_id' => $category->getParentId(),
-            'name' => $category->getName(),
-            'slug' => $category->getSlug(),
-            'description' => $category->getDescription(),
+            'id' => $productCategory->getId(),
+            'parent_id' => $productCategory->getParentId(),
+            'name' => $productCategory->getName(),
+            'slug' => $productCategory->getSlug(),
+            'description' => $productCategory->getDescription(),
         ]);
     }
 

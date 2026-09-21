@@ -9,15 +9,7 @@ use Ttpryg\CatalogEngine\Entities\Product;
 
 class PdoProductRepository implements ProductRepositoryInterface
 {
-    private PDO $pdo;
-
-    private string $table;
-
-    public function __construct(PDO $pdo, string $table = 'products')
-    {
-        $this->pdo = $pdo;
-        $this->table = $table;
-    }
+    public function __construct(private readonly PDO $pdo, private readonly string $table = 'products') {}
 
     public function findById(int|string $id, bool $includeTrashed = false): ?Product
     {
@@ -323,7 +315,7 @@ class PdoProductRepository implements ProductRepositoryInterface
     {
         $dimensions = null;
         if (! empty($data['dimensions'])) {
-            $decoded = json_decode($data['dimensions'], true);
+            $decoded = json_decode($data['dimensions'], associative: true);
             if (is_array($decoded)) {
                 $dimensions = $decoded;
             }
@@ -331,7 +323,7 @@ class PdoProductRepository implements ProductRepositoryInterface
 
         $attributes = [];
         if (! empty($data['attributes'])) {
-            $decoded = json_decode($data['attributes'], true);
+            $decoded = json_decode($data['attributes'], associative: true);
             if (is_array($decoded)) {
                 $attributes = $decoded;
             }
@@ -339,7 +331,7 @@ class PdoProductRepository implements ProductRepositoryInterface
 
         $images = [];
         if (! empty($data['images'])) {
-            $decoded = json_decode($data['images'], true);
+            $decoded = json_decode($data['images'], associative: true);
             if (is_array($decoded)) {
                 $images = $decoded;
             }
@@ -349,8 +341,8 @@ class PdoProductRepository implements ProductRepositoryInterface
             name: $data['name'],
             slug: $data['slug'],
             price: (float) $data['price'],
-            storeId: isset($data['store_id']) ? $data['store_id'] : null,
-            ownerId: isset($data['owner_id']) ? $data['owner_id'] : null,
+            storeId: $data['store_id'] ?? null,
+            ownerId: $data['owner_id'] ?? null,
             sku: $data['sku'] ?? null,
             barcode: $data['barcode'] ?? null,
             summary: $data['summary'] ?? null,

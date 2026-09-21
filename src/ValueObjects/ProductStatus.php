@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Ttpryg\CatalogEngine\ValueObjects;
 
 enum ProductStatus: string

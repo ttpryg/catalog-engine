@@ -24,22 +24,22 @@ class ProductServiceTest extends TestCase
         $dispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $slugGen->method('generate')->with('Laptop Gaming')->willReturn('laptop-gaming');
-        $repo->method('findBySlug')->willReturn(null);
+        $repo->method('findBySlug')->willReturn(value: null);
 
         $repo->expects($this->once())
             ->method('save')
-            ->willReturnCallback(function (Product $p) {
-                $p->setId(1);
+            ->willReturnCallback(function (Product $product): \Ttpryg\CatalogEngine\Entities\Product {
+                $product->setId(1);
 
-                return $p;
+                return $product;
             });
 
         $dispatcher->expects($this->once())
             ->method('dispatch')
             ->with($this->isInstanceOf(ProductCreatedEvent::class));
 
-        $service = new ProductService($repo, $slugGen, $dispatcher);
-        $product = $service->createProduct('Laptop Gaming', price: 15000000.0, stock: 10);
+        $productService = new ProductService($repo, $slugGen, $dispatcher);
+        $product = $productService->createProduct('Laptop Gaming', price: 15000000.0, stock: 10);
 
         $this->assertEquals(1, $product->getId());
         $this->assertEquals('laptop-gaming', $product->getSlug());
@@ -54,11 +54,11 @@ class ProductServiceTest extends TestCase
 
         $product = new Product('Mouse Wireless', 'mouse-wireless', price: 150000.0, stock: 6, minStock: 5, id: 1);
         $repo->method('findById')->with(1)->willReturn($product);
-        $repo->method('updateStock')->with(1, -2)->willReturn(true);
+        $repo->method('updateStock')->with(1, -2)->willReturn(value: true);
 
         $dispatcher->expects($this->exactly(2))
             ->method('dispatch')
-            ->willReturnCallback(function (object $event) {
+            ->willReturnCallback(function (object $event): void {
                 if ($event instanceof ProductStockUpdatedEvent) {
                     $this->assertEquals(6, $event->previousStock);
                     $this->assertEquals(4, $event->newStock);
@@ -68,8 +68,8 @@ class ProductServiceTest extends TestCase
                 }
             });
 
-        $service = new ProductService($repo, null, $dispatcher);
-        $result = $service->updateStock(1, -2);
+        $productService = new ProductService($repo, eventDispatcher: $dispatcher);
+        $result = $productService->updateStock(1, -2);
 
         $this->assertTrue($result);
     }
@@ -84,19 +84,19 @@ class ProductServiceTest extends TestCase
 
         $this->expectException(InsufficientStockException::class);
 
-        $service = new ProductService($repo);
-        $service->updateStock(2, -5);
+        $productService = new ProductService($repo);
+        $productService->updateStock(2, -5);
     }
 
     // NEGATIVE CASE: Non Existent Product Throws ProductNotFoundException
     public function test_update_price_fails_on_non_existent_product(): void
     {
         $repo = $this->createMock(ProductRepositoryInterface::class);
-        $repo->method('findById')->with(999)->willReturn(null);
+        $repo->method('findById')->with(999)->willReturn(value: null);
 
         $this->expectException(ProductNotFoundException::class);
 
-        $service = new ProductService($repo);
-        $service->updatePrice(999, 200000.0);
+        $productService = new ProductService($repo);
+        $productService->updatePrice(999, 200000.0);
     }
 }

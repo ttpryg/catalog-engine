@@ -9,15 +9,7 @@ use Ttpryg\CatalogEngine\Entities\ProductVariant;
 
 class PdoVariantRepository implements VariantRepositoryInterface
 {
-    private PDO $pdo;
-
-    private string $table;
-
-    public function __construct(PDO $pdo, string $table = 'product_variants')
-    {
-        $this->pdo = $pdo;
-        $this->table = $table;
-    }
+    public function __construct(private readonly PDO $pdo, private readonly string $table = 'product_variants') {}
 
     public function findById(int|string $id): ?ProductVariant
     {
@@ -55,29 +47,29 @@ class PdoVariantRepository implements VariantRepositoryInterface
         return $results;
     }
 
-    public function save(ProductVariant $variant): ProductVariant
+    public function save(ProductVariant $productVariant): ProductVariant
     {
         $sql = "INSERT INTO {$this->table} (product_id, sku, name, price, stock, variant_attributes, created_at) 
                 VALUES (:product_id, :sku, :name, :price, :stock, :variant_attributes, :created_at)";
 
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            'product_id' => $variant->getProductId(),
-            'sku' => $variant->getSku(),
-            'name' => $variant->getName(),
-            'price' => $variant->getPrice(),
-            'stock' => $variant->getStock(),
-            'variant_attributes' => json_encode($variant->getVariantAttributes()),
-            'created_at' => $variant->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'product_id' => $productVariant->getProductId(),
+            'sku' => $productVariant->getSku(),
+            'name' => $productVariant->getName(),
+            'price' => $productVariant->getPrice(),
+            'stock' => $productVariant->getStock(),
+            'variant_attributes' => json_encode($productVariant->getVariantAttributes()),
+            'created_at' => $productVariant->getCreatedAt()?->format('Y-m-d H:i:s'),
         ]);
 
         $id = $this->pdo->lastInsertId();
-        $variant->setId($id);
+        $productVariant->setId($id);
 
-        return $variant;
+        return $productVariant;
     }
 
-    public function update(ProductVariant $variant): bool
+    public function update(ProductVariant $productVariant): bool
     {
         $sql = "UPDATE {$this->table} 
                 SET sku = :sku, 
@@ -90,12 +82,12 @@ class PdoVariantRepository implements VariantRepositoryInterface
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([
-            'id' => $variant->getId(),
-            'sku' => $variant->getSku(),
-            'name' => $variant->getName(),
-            'price' => $variant->getPrice(),
-            'stock' => $variant->getStock(),
-            'variant_attributes' => json_encode($variant->getVariantAttributes()),
+            'id' => $productVariant->getId(),
+            'sku' => $productVariant->getSku(),
+            'name' => $productVariant->getName(),
+            'price' => $productVariant->getPrice(),
+            'stock' => $productVariant->getStock(),
+            'variant_attributes' => json_encode($productVariant->getVariantAttributes()),
         ]);
     }
 
@@ -119,7 +111,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
     {
         $attributes = [];
         if (! empty($data['variant_attributes'])) {
-            $decoded = json_decode($data['variant_attributes'], true);
+            $decoded = json_decode($data['variant_attributes'], associative: true);
             if (is_array($decoded)) {
                 $attributes = $decoded;
             }

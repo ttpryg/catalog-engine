@@ -11,7 +11,7 @@ class PdoProductRepositoryTest extends TestCase
 {
     private PDO $pdo;
 
-    private PdoProductRepository $repository;
+    private PdoProductRepository $pdoProductRepository;
 
     protected function setUp(): void
     {
@@ -49,7 +49,7 @@ class PdoProductRepositoryTest extends TestCase
             )
         ");
 
-        $this->repository = new PdoProductRepository($this->pdo);
+        $this->pdoProductRepository = new PdoProductRepository($this->pdo);
     }
 
     // POSITIVE CASE: Save and Find by Store ID & Owner ID
@@ -75,14 +75,14 @@ class PdoProductRepositoryTest extends TestCase
             status: 'active'
         );
 
-        $this->repository->save($product1);
-        $this->repository->save($product2);
+        $this->pdoProductRepository->save($product1);
+        $this->pdoProductRepository->save($product2);
 
-        $storeAProducts = $this->repository->findByStoreId(10);
+        $storeAProducts = $this->pdoProductRepository->findByStoreId(10);
         $this->assertCount(1, $storeAProducts);
         $this->assertEquals('Kemeja Store A', $storeAProducts[0]->getName());
 
-        $ownerProducts = $this->repository->findByOwnerId(42);
+        $ownerProducts = $this->pdoProductRepository->findByOwnerId(42);
         $this->assertCount(2, $ownerProducts);
     }
 
@@ -90,13 +90,13 @@ class PdoProductRepositoryTest extends TestCase
     public function test_stock_and_sales_increment(): void
     {
         $product = new Product('Celana Chino', 'celana-chino', price: 180000.0, stock: 20);
-        $saved = $this->repository->save($product);
+        $saved = $this->pdoProductRepository->save($product);
         $id = $saved->getId();
 
-        $this->repository->updateStock($id, -5);
-        $this->repository->incrementSales($id, 5);
+        $this->pdoProductRepository->updateStock($id, -5);
+        $this->pdoProductRepository->incrementSales($id, 5);
 
-        $updated = $this->repository->findById($id);
+        $updated = $this->pdoProductRepository->findById($id);
         $this->assertEquals(15, $updated->getStock());
         $this->assertEquals(5, $updated->getSalesCount());
     }
@@ -105,12 +105,12 @@ class PdoProductRepositoryTest extends TestCase
     public function test_soft_delete_product(): void
     {
         $product = new Product('Produk Hapus', 'produk-hapus', price: 50000.0);
-        $saved = $this->repository->save($product);
+        $saved = $this->pdoProductRepository->save($product);
         $id = $saved->getId();
 
-        $this->repository->delete($id, softDelete: true);
+        $this->pdoProductRepository->delete($id, softDelete: true);
 
-        $this->assertNull($this->repository->findById($id, includeTrashed: false));
-        $this->assertNotNull($this->repository->findById($id, includeTrashed: true));
+        $this->assertNull($this->pdoProductRepository->findById($id, includeTrashed: false));
+        $this->assertNotNull($this->pdoProductRepository->findById($id, includeTrashed: true));
     }
 }
