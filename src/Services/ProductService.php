@@ -110,16 +110,24 @@ class ProductService
 
         $result = $this->productRepository->updateStock($productId, $quantityChange);
 
-        if ($result) {
-            $product->setStock($newStock);
-            $this->eventDispatcher?->dispatch(new ProductStockUpdatedEvent($product, $previousStock, $newStock));
-
-            if ($newStock <= $product->getMinStock()) {
-                $this->eventDispatcher?->dispatch(new LowStockDetectedEvent($product, $newStock, $product->getMinStock()));
+        if (! $result) {
+            if ($quantityChange < 0) {
+                $latest = $this->productRepository->findById($productId);
+                $latestStock = $latest instanceof \Ttpryg\CatalogEngine\Entities\Product ? $latest->getStock() : $previousStock;
+                throw new InsufficientStockException(abs($quantityChange), $latestStock);
             }
+
+            return false;
         }
 
-        return $result;
+        $product->setStock($newStock);
+        $this->eventDispatcher?->dispatch(new ProductStockUpdatedEvent($product, $previousStock, $newStock));
+
+        if ($newStock <= $product->getMinStock()) {
+            $this->eventDispatcher?->dispatch(new LowStockDetectedEvent($product, $newStock, $product->getMinStock()));
+        }
+
+        return true;
     }
 
     public function setStatus(int|string $productId, string $status): bool

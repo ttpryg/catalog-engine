@@ -8,4 +8,9 @@ class VariantNotFoundException extends CatalogEngineException
     {
         return new self("Product variant with ID '{$id}' was not found.");
     }
+
+    public static function bySku(string $sku): self
+    {
+        return new self("Product variant with SKU '{$sku}' was not found.");
+    }
 }

@@ -64,7 +64,7 @@ class PdoCategoryRepository implements CategoryRepositoryInterface
             'name' => $productCategory->getName(),
             'slug' => $productCategory->getSlug(),
             'description' => $productCategory->getDescription(),
-            'created_at' => $productCategory->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'created_at' => $productCategory->getCreatedAt()->format('Y-m-d H:i:s'),
         ]);
 
         $id = $this->pdo->lastInsertId();
@@ -97,7 +97,10 @@ class PdoCategoryRepository implements CategoryRepositoryInterface
 
     public function attachToProduct(int|string $productId, int|string $categoryId): bool
     {
-        $sql = "INSERT IGNORE INTO {$this->pivotTable} (product_id, category_id) VALUES (:product_id, :category_id)";
+        $driver = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $ignoreClause = ($driver === 'sqlite') ? 'INSERT OR IGNORE INTO' : 'INSERT IGNORE INTO';
+
+        $sql = "{$ignoreClause} {$this->pivotTable} (product_id, category_id) VALUES (:product_id, :category_id)";
         $stmt = $this->pdo->prepare($sql);
 
         return $stmt->execute([

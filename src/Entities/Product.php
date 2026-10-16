@@ -11,9 +11,9 @@ class Product implements ProductInterface
 {
     private string $status;
 
-    private readonly ?DateTimeInterface $createdAt;
+    private readonly DateTimeInterface $createdAt;
 
-    private readonly ?DateTimeInterface $updatedAt;
+    private readonly DateTimeInterface $updatedAt;
 
     public function __construct(
         private string $name,
@@ -248,12 +248,12 @@ class Product implements ProductInterface
         return $this->salesCount;
     }
 
-    public function getCreatedAt(): ?DateTimeInterface
+    public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?DateTimeInterface
+    public function getUpdatedAt(): DateTimeInterface
     {
         return $this->updatedAt;
     }
@@ -291,8 +291,8 @@ class Product implements ProductInterface
             'images' => $this->images,
             'view_count' => $this->viewCount,
             'sales_count' => $this->salesCount,
-            'created_at' => $this->createdAt?->format(DateTimeInterface::ATOM),
-            'updated_at' => $this->updatedAt?->format(DateTimeInterface::ATOM),
+            'created_at' => $this->createdAt->format(DateTimeInterface::ATOM),
+            'updated_at' => $this->updatedAt->format(DateTimeInterface::ATOM),
             'deleted_at' => $this->deletedAt?->format(DateTimeInterface::ATOM),
         ];
     }

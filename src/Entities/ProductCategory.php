@@ -7,13 +7,13 @@ use DateTimeInterface;
 
 class ProductCategory
 {
-    private readonly ?DateTimeInterface $createdAt;
+    private readonly DateTimeInterface $createdAt;
 
     public function __construct(
-        private readonly string $name,
-        private readonly string $slug,
-        private readonly ?int $parentId = null,
-        private readonly ?string $description = null,
+        private string $name,
+        private string $slug,
+        private ?int $parentId = null,
+        private ?string $description = null,
         private int|string|null $id = null,
         ?DateTimeInterface $createdAt = null
     ) {
@@ -37,9 +37,23 @@ class ProductCategory
         return $this->parentId;
     }
 
+    public function setParentId(?int $parentId): self
+    {
+        $this->parentId = $parentId;
+
+        return $this;
+    }
+
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
     }
 
     public function getSlug(): string
@@ -47,12 +61,26 @@ class ProductCategory
         return $this->slug;
     }
 
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function getCreatedAt(): ?DateTimeInterface
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -65,7 +93,7 @@ class ProductCategory
             'name' => $this->name,
             'slug' => $this->slug,
             'description' => $this->description,
-            'created_at' => $this->createdAt?->format(DateTimeInterface::ATOM),
+            'created_at' => $this->createdAt->format(DateTimeInterface::ATOM),
         ];
     }
 }

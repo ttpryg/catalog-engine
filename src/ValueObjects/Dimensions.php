@@ -8,7 +8,11 @@ class Dimensions
         public readonly float $lengthCm = 0.0,
         public readonly float $widthCm = 0.0,
         public readonly float $heightCm = 0.0
-    ) {}
+    ) {
+        if ($lengthCm < 0 || $widthCm < 0 || $heightCm < 0) {
+            throw new \InvalidArgumentException('Dimensions cannot be negative.');
+        }
+    }
 
     public static function fromArray(?array $data): ?self
     {

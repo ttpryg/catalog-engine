@@ -7,15 +7,15 @@ use DateTimeInterface;
 
 class ProductVariant
 {
-    private readonly ?DateTimeInterface $createdAt;
+    private readonly DateTimeInterface $createdAt;
 
     public function __construct(
         private readonly int|string $productId,
-        private readonly string $name,
-        private readonly ?string $sku = null,
-        private readonly ?float $price = null,
+        private string $name,
+        private ?string $sku = null,
+        private ?float $price = null,
         private int $stock = 0,
-        private readonly array $variantAttributes = [],
+        private array $variantAttributes = [],
         private int|string|null $id = null,
         ?DateTimeInterface $createdAt = null
     ) {
@@ -44,14 +44,35 @@ class ProductVariant
         return $this->name;
     }
 
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
     public function getSku(): ?string
     {
         return $this->sku;
     }
 
+    public function setSku(?string $sku): self
+    {
+        $this->sku = $sku;
+
+        return $this;
+    }
+
     public function getPrice(): ?float
     {
         return $this->price;
+    }
+
+    public function setPrice(?float $price): self
+    {
+        $this->price = $price;
+
+        return $this;
     }
 
     public function getStock(): int
@@ -71,7 +92,14 @@ class ProductVariant
         return $this->variantAttributes;
     }
 
-    public function getCreatedAt(): ?DateTimeInterface
+    public function setVariantAttributes(array $variantAttributes): self
+    {
+        $this->variantAttributes = $variantAttributes;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
     }
@@ -86,7 +114,7 @@ class ProductVariant
             'price' => $this->price,
             'stock' => $this->stock,
             'variant_attributes' => $this->variantAttributes,
-            'created_at' => $this->createdAt?->format(DateTimeInterface::ATOM),
+            'created_at' => $this->createdAt->format(DateTimeInterface::ATOM),
         ];
     }
 }

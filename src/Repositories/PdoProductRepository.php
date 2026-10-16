@@ -9,6 +9,21 @@ use Ttpryg\CatalogEngine\Entities\Product;
 
 class PdoProductRepository implements ProductRepositoryInterface
 {
+    private const ALLOWED_SORT_FIELDS = [
+        'id' => 'id',
+        'name' => 'name',
+        'slug' => 'slug',
+        'price' => 'price',
+        'sale_price' => 'sale_price',
+        'cost_price' => 'cost_price',
+        'stock' => 'stock',
+        'weight_grams' => 'weight_grams',
+        'view_count' => 'view_count',
+        'sales_count' => 'sales_count',
+        'created_at' => 'created_at',
+        'updated_at' => 'updated_at',
+    ];
+
     public function __construct(private readonly PDO $pdo, private readonly string $table = 'products') {}
 
     public function findById(int|string $id, bool $includeTrashed = false): ?Product
@@ -114,9 +129,19 @@ class PdoProductRepository implements ProductRepositoryInterface
 
         $orderSqls = [];
         foreach ($orderBy as $field => $dir) {
-            $direction = strtoupper($dir) === 'ASC' ? 'ASC' : 'DESC';
-            $orderSqls[] = "{$field} {$direction}";
+            $fieldLower = strtolower(trim((string) $field));
+            if (! isset(self::ALLOWED_SORT_FIELDS[$fieldLower])) {
+                continue;
+            }
+            $safeField = self::ALLOWED_SORT_FIELDS[$fieldLower];
+            $direction = strtoupper((string) $dir) === 'ASC' ? 'ASC' : 'DESC';
+            $orderSqls[] = "{$safeField} {$direction}";
         }
+
+        if ($orderSqls === []) {
+            $orderSqls[] = 'created_at DESC';
+        }
+
         $orderSql = implode(', ', $orderSqls);
 
         $sql = "SELECT * FROM {$this->table} WHERE {$whereSql} ORDER BY {$orderSql} LIMIT :limit OFFSET :offset";
@@ -195,8 +220,8 @@ class PdoProductRepository implements ProductRepositoryInterface
             'images' => json_encode($product->getImages()),
             'view_count' => $product->getViewCount(),
             'sales_count' => $product->getSalesCount(),
-            'created_at' => $product->getCreatedAt()?->format('Y-m-d H:i:s'),
-            'updated_at' => $product->getUpdatedAt()?->format('Y-m-d H:i:s'),
+            'created_at' => $product->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updated_at' => $product->getUpdatedAt()->format('Y-m-d H:i:s'),
         ]);
 
         $id = $this->pdo->lastInsertId();
@@ -289,10 +314,20 @@ class PdoProductRepository implements ProductRepositoryInterface
 
     public function updateStock(int|string $id, int $quantityChange): bool
     {
-        $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
+        if ($quantityChange === 0) {
+            return $this->findById($id) instanceof \Ttpryg\CatalogEngine\Entities\Product;
+        }
 
-        return $stmt->execute(['id' => $id, 'change' => $quantityChange]);
+        if ($quantityChange < 0) {
+            $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id AND (stock + :change) >= 0";
+        } else {
+            $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id";
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $id, 'change' => $quantityChange]);
+
+        return $stmt->rowCount() > 0;
     }
 
     public function incrementViews(int|string $id): bool

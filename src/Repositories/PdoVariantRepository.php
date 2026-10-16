@@ -60,7 +60,7 @@ class PdoVariantRepository implements VariantRepositoryInterface
             'price' => $productVariant->getPrice(),
             'stock' => $productVariant->getStock(),
             'variant_attributes' => json_encode($productVariant->getVariantAttributes()),
-            'created_at' => $productVariant->getCreatedAt()?->format('Y-m-d H:i:s'),
+            'created_at' => $productVariant->getCreatedAt()->format('Y-m-d H:i:s'),
         ]);
 
         $id = $this->pdo->lastInsertId();
@@ -101,10 +101,20 @@ class PdoVariantRepository implements VariantRepositoryInterface
 
     public function updateStock(int|string $id, int $quantityChange): bool
     {
-        $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id";
-        $stmt = $this->pdo->prepare($sql);
+        if ($quantityChange === 0) {
+            return $this->findById($id) instanceof \Ttpryg\CatalogEngine\Entities\ProductVariant;
+        }
 
-        return $stmt->execute(['id' => $id, 'change' => $quantityChange]);
+        if ($quantityChange < 0) {
+            $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id AND (stock + :change) >= 0";
+        } else {
+            $sql = "UPDATE {$this->table} SET stock = stock + :change WHERE id = :id";
+        }
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['id' => $id, 'change' => $quantityChange]);
+
+        return $stmt->rowCount() > 0;
     }
 
     private function mapToEntity(array $data): ProductVariant

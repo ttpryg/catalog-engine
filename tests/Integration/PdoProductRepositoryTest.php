@@ -113,4 +113,63 @@ class PdoProductRepositoryTest extends TestCase
         $this->assertNull($this->pdoProductRepository->findById($id, includeTrashed: false));
         $this->assertNotNull($this->pdoProductRepository->findById($id, includeTrashed: true));
     }
+
+    public function test_atomic_stock_deduction_prevents_negative_stock(): void
+    {
+        $product = new Product('Item Terbatas', 'item-terbatas', price: 100000.0, stock: 5);
+        $saved = $this->pdoProductRepository->save($product);
+        $id = $saved->getId();
+
+        // Attempt to deduct 10 when stock is only 5
+        $success = $this->pdoProductRepository->updateStock($id, -10);
+        $this->assertFalse($success);
+
+        // Verify stock is still 5 (not -5)
+        $fresh = $this->pdoProductRepository->findById($id);
+        $this->assertEquals(5, $fresh->getStock());
+    }
+
+    public function test_order_by_whitelist_and_sql_injection_defense(): void
+    {
+        $p1 = new Product('Product Expensive', 'prod-exp', price: 500000.0);
+        $p2 = new Product('Product Cheap', 'prod-cheap', price: 100000.0);
+        $this->pdoProductRepository->save($p1);
+        $this->pdoProductRepository->save($p2);
+
+        // Normal sort ascending
+        $asc = $this->pdoProductRepository->findAll([], orderBy: ['price' => 'ASC']);
+        $this->assertEquals('Product Cheap', $asc[0]->getName());
+
+        // Malicious sort input should be sanitized and ignore malicious field
+        $malicious = $this->pdoProductRepository->findAll([], orderBy: ['price; DROP TABLE products;--' => 'ASC']);
+        $this->assertNotEmpty($malicious);
+        // Products table should still exist
+        $this->assertGreaterThanOrEqual(2, $this->pdoProductRepository->count());
+    }
+
+    public function test_find_all_with_filtering_criteria(): void
+    {
+        $p1 = new Product('Gamis Syari Batik', 'gamis-syari-batik', price: 250000.0, sku: 'GMS-01', status: 'active');
+        $p2 = new Product('Kemeja Flanel Kotak', 'kemeja-flanel-kotak', price: 150000.0, sku: 'KMJ-02', status: 'active');
+        $p3 = new Product('Jaket Kulit Motor', 'jaket-kulit-motor', price: 750000.0, sku: 'JKT-03', status: 'draft');
+
+        $this->pdoProductRepository->save($p1);
+        $this->pdoProductRepository->save($p2);
+        $this->pdoProductRepository->save($p3);
+
+        // Search by keyword
+        $searchRes = $this->pdoProductRepository->findAll(['search' => 'Batik']);
+        $this->assertCount(1, $searchRes);
+        $this->assertEquals('Gamis Syari Batik', $searchRes[0]->getName());
+
+        // Filter by price range
+        $priceRes = $this->pdoProductRepository->findAll(['min_price' => 100000, 'max_price' => 200000]);
+        $this->assertCount(1, $priceRes);
+        $this->assertEquals('Kemeja Flanel Kotak', $priceRes[0]->getName());
+
+        // Filter by status
+        $draftRes = $this->pdoProductRepository->findAll(['status' => 'draft']);
+        $this->assertCount(1, $draftRes);
+        $this->assertEquals('Jaket Kulit Motor', $draftRes[0]->getName());
+    }
 }
