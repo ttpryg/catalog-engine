@@ -6,4 +6,4 @@ namespace Ttpryg\CatalogEngine\Exceptions;
 
 use Exception;
 
-class CatalogEngineException extends Exception {}
+class CatalogEngineException extends Exception implements ExceptionInterface {}
